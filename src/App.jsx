@@ -172,12 +172,14 @@ function App() {
   return (
     <main className="app-shell">
       <section className="hero-section" aria-labelledby="page-title">
+        <h1 className="sr-only" id="page-title">
+          Brockton Hub
+        </h1>
         <div className="hero-image-wrap">
           <img src={hubHero} alt="Brockton Hub community banner" />
         </div>
         <div className="hero-content">
           <p className="eyebrow">Brockton weekend guide</p>
-          <h1 id="page-title">Brockton Hub</h1>
           <p>
             Find concerts, festivals, markets, celebrations, and community
             events happening around you this weekend.

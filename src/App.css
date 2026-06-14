@@ -1,41 +1,47 @@
 .app-shell {
   min-height: 100svh;
-  padding: 0 16px 96px;
+  padding: 0 14px 96px;
   background:
     radial-gradient(circle at top left, rgba(46, 139, 214, 0.16), transparent 30rem),
     linear-gradient(180deg, #f4faff 0%, #ffffff 48%, #edf6fc 100%);
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .hero-section {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 10px 0 12px;
+  padding: 8px 0 10px;
 }
 
 .hero-image-wrap {
   overflow: hidden;
-  min-height: 132px;
-  border-radius: 0 0 28px 28px;
-  box-shadow: 0 14px 30px rgba(11, 73, 125, 0.18);
+  border-radius: 0 0 22px 22px;
+  box-shadow: 0 12px 24px rgba(11, 73, 125, 0.16);
   background: #0f5f9d;
 }
 
 .hero-image-wrap img {
   display: block;
   width: 100%;
-  height: 132px;
+  height: 128px;
   object-fit: cover;
+  object-position: 50% 29%;
 }
 
 .hero-content {
-  margin: -22px 12px 0;
-  position: relative;
-  padding: 16px;
-  border: 1px solid rgba(136, 190, 230, 0.5);
-  border-radius: 18px;
+  max-width: 720px;
+  margin: 12px 2px 0;
   color: #173d5f;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 12px 26px rgba(15, 95, 157, 0.12);
 }
 
 .eyebrow {
@@ -47,17 +53,11 @@
   text-transform: uppercase;
 }
 
-.hero-content h1 {
-  margin: 0;
-  color: #073b66;
-  font-size: 2rem;
-  line-height: 1;
-}
-
 .hero-content p:last-child {
-  margin: 8px 0 0;
+  margin: 0;
   color: #355e7d;
-  font-size: 0.95rem;
+  font-size: 0.98rem;
+  line-height: 1.45;
 }
 
 .filters-section,
@@ -70,7 +70,7 @@
 .filters-section {
   display: grid;
   gap: 10px;
-  padding: 4px 0 18px;
+  padding: 4px 0 16px;
 }
 
 .filters-section label {
@@ -347,17 +347,11 @@
 
   .hero-image-wrap,
   .hero-image-wrap img {
-    height: 210px;
+    height: 200px;
   }
 
   .hero-content {
-    max-width: 650px;
-    margin-top: -40px;
-    padding: 24px;
-  }
-
-  .hero-content h1 {
-    font-size: 3rem;
+    margin-top: 14px;
   }
 
   .filters-section {
@@ -378,11 +372,11 @@
 
 @media (min-width: 960px) {
   .hero-section {
-    padding-top: 24px;
+    padding-top: 18px;
   }
 
   .hero-image-wrap {
-    border-radius: 28px;
+    border-radius: 24px;
   }
 
   .event-list {
