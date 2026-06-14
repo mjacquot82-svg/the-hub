@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import hubHero from './assets/images/hub.png'
-import { events } from './data/events'
+import { loadEvents } from './data/events'
 import './App.css'
 
 const dateFilters = [
@@ -42,32 +42,132 @@ const spotlightCards = [
   },
 ]
 
-function groupEventsByDay(filteredEvents) {
-  return filteredEvents.reduce((groups, event) => {
-    if (!groups[event.day]) {
-      groups[event.day] = []
+function getEventTime(event) {
+  const eventDate = new Date(`${event.startDate}T12:00:00`)
+  return Number.isNaN(eventDate.getTime()) ? Number.MAX_SAFE_INTEGER : eventDate.getTime()
+}
+
+function formatTimelineDate(event) {
+  const eventDate = new Date(`${event.startDate}T12:00:00`)
+
+  if (Number.isNaN(eventDate.getTime())) {
+    return 'Upcoming'
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    day: 'numeric',
+  }).format(eventDate)
+}
+
+function groupEventsByStartDate(events) {
+  return events.reduce((groups, event) => {
+    const timelineDate = formatTimelineDate(event)
+
+    if (!groups[timelineDate]) {
+      groups[timelineDate] = []
     }
 
-    groups[event.day].push(event)
+    groups[timelineDate].push(event)
     return groups
   }, {})
 }
 
+function EventCard({ event }) {
+  return (
+    <article className="event-card">
+      <div className="event-card-top">
+        <div>
+          <div className="event-date-row">
+            <p className="event-date">{event.date}</p>
+            {event.dateBadge ? (
+              <span className="date-badge">{event.dateBadge}</span>
+            ) : null}
+          </div>
+          <h4>{event.name}</h4>
+          <p className="event-town">
+            <span aria-hidden="true">📍</span>
+            {event.town}
+          </p>
+        </div>
+        <span
+          className={`status-badge ${event.status
+            .toLowerCase()
+            .replaceAll(' ', '-')}`}
+        >
+          {event.status}
+        </span>
+      </div>
+
+      <p className="event-description">{event.description}</p>
+
+      <div className="event-meta">
+        <span>{event.category}</span>
+      </div>
+    </article>
+  )
+}
+
 function App() {
+  const [events, setEvents] = useState([])
   const [dateFilter, setDateFilter] = useState('This Weekend')
   const [categoryFilter, setCategoryFilter] = useState('All Categories')
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function fetchEvents() {
+      try {
+        const loadedEvents = await loadEvents()
+
+        if (isMounted) {
+          setEvents(loadedEvents)
+          setLoadError('')
+        }
+      } catch (error) {
+        if (isMounted) {
+          setLoadError(error.message)
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    fetchEvents()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
       const matchesDate = event.dateFilters.includes(dateFilter)
       const matchesCategory =
-        categoryFilter === 'All Categories' || event.category === categoryFilter
+        categoryFilter === 'All Categories' ||
+        event.categoryFilters.includes(categoryFilter)
 
       return matchesDate && matchesCategory
     })
-  }, [dateFilter, categoryFilter])
+  }, [events, dateFilter, categoryFilter])
 
-  const groupedEvents = groupEventsByDay(filteredEvents)
+  const recurringEvents = useMemo(() => {
+    return filteredEvents
+      .filter((event) => event.dateBadge)
+      .toSorted((firstEvent, secondEvent) => getEventTime(firstEvent) - getEventTime(secondEvent))
+  }, [filteredEvents])
+
+  const timelineEvents = useMemo(() => {
+    return filteredEvents
+      .filter((event) => !event.dateBadge)
+      .toSorted((firstEvent, secondEvent) => getEventTime(firstEvent) - getEventTime(secondEvent))
+  }, [filteredEvents])
+
+  const groupedEvents = groupEventsByStartDate(timelineEvents)
 
   return (
     <main className="app-shell">
@@ -121,41 +221,48 @@ function App() {
           <h2 id="events-title">What&apos;s Happening</h2>
         </div>
 
-        {filteredEvents.length > 0 ? (
-          Object.entries(groupedEvents).map(([day, dayEvents]) => (
-            <div className="day-group" key={day}>
-              <h3>{day}</h3>
-              <div className="event-list">
-                {dayEvents.map((event) => (
-                  <article className="event-card" key={event.id}>
-                    <div className="event-card-top">
-                      <div>
-                        <p className="event-date">{event.date}</p>
-                        <h4>{event.name}</h4>
-                        <p className="event-town">
-                          <span aria-hidden="true">📍</span>
-                          {event.town}
-                        </p>
-                      </div>
-                      <span
-                        className={`status-badge ${event.status
-                          .toLowerCase()
-                          .replaceAll(' ', '-')}`}
-                      >
-                        {event.status}
-                      </span>
-                    </div>
+        {isLoading ? (
+          <div className="empty-state">
+            <h3>Loading events</h3>
+            <p>Checking the Brockton Hub calendar for the latest listings.</p>
+          </div>
+        ) : loadError ? (
+          <div className="empty-state">
+            <h3>Events could not be loaded</h3>
+            <p>
+              Please try again soon. The community calendar may be temporarily
+              unavailable.
+            </p>
+          </div>
+        ) : filteredEvents.length > 0 ? (
+          <>
+            {recurringEvents.length > 0 ? (
+              <div className="timeline-section">
+                <h3>🔁 Recurring Events</h3>
+                <div className="event-list">
+                  {recurringEvents.map((event) => (
+                    <EventCard event={event} key={event.id} />
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
-                    <p className="event-description">{event.description}</p>
-
-                    <div className="event-meta">
-                      <span>{event.category}</span>
+            {timelineEvents.length > 0 ? (
+              <div className="timeline-section">
+                <h3>Upcoming Events</h3>
+                {Object.entries(groupedEvents).map(([date, dateEvents]) => (
+                  <div className="day-group" key={date}>
+                    <h4>{date}</h4>
+                    <div className="event-list">
+                      {dateEvents.map((event) => (
+                        <EventCard event={event} key={event.id} />
+                      ))}
                     </div>
-                  </article>
+                  </div>
                 ))}
               </div>
-            </div>
-          ))
+            ) : null}
+          </>
         ) : (
           <div className="empty-state">
             <h3>No events found</h3>

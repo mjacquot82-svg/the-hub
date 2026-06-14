@@ -105,11 +105,21 @@
   line-height: 1.15;
 }
 
-.day-group {
+.timeline-section {
   margin-top: 16px;
 }
 
-.day-group h3 {
+.timeline-section > h3 {
+  margin: 0 0 8px;
+  color: #244f6d;
+  font-size: 1.05rem;
+}
+
+.day-group {
+  margin-top: 14px;
+}
+
+.day-group h4 {
   margin: 0 0 8px;
   color: #244f6d;
   font-size: 1.05rem;
@@ -138,11 +148,36 @@
   gap: 10px;
 }
 
+.event-date-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 0 0 4px;
+}
+
 .event-date {
   margin: 0 0 4px;
   color: #1976b8;
   font-size: 0.82rem;
   font-weight: 900;
+}
+
+.event-date-row .event-date {
+  margin: 0;
+}
+
+.date-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #0b4f78;
+  background: #dff1fb;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .event-town {
